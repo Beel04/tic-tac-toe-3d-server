@@ -1,35 +1,27 @@
-import socket
-import threading
+import asyncio
+import websockets
 import os
-HOST = "0.0.0.0"
+
 PORT = int(os.environ.get("PORT", 5000))
+clientes = set()
 
-
-clientes = []
-
-def manejar_cliente(conn):
-    while True:
-        try:
-            data = conn.recv(1024)
-            if not data:
-                break
+async def handler(websocket):
+    print("Jugador conectado")
+    clientes.add(websocket)
+    try:
+        async for message in websocket:
             for c in clientes:
-                if c != conn:
-                    c.sendall(data)
-        except:
-            break
-    conn.close()
-    clientes.remove(conn)
+                if c != websocket:
+                    await c.send(message)
+    except:
+        pass
+    finally:
+        clientes.remove(websocket)
+        print("Jugador desconectado")
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((HOST, PORT))
-server.listen(2)
+async def main():
+    async with websockets.serve(handler, "0.0.0.0", PORT):
+        print("Servidor WebSocket listo")
+        await asyncio.Future()  # corre para siempre
 
-print("Servidor listo, esperando jugadores...")
-
-while True:
-    conn, addr = server.accept()
-    print("Jugador conectado:", addr)
-    clientes.append(conn)
-    threading.Thread(target=manejar_cliente, args=(conn,)).start()
-
+asyncio.run(main())
