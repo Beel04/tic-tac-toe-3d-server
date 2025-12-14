@@ -2,10 +2,10 @@ import asyncio
 import websockets
 import os
 
-PORT = int(os.environ.get("PORT", 5000))
+PORT = int(os.environ.get("PORT", 10000))
 clientes = set()
 
-async def handler(websocket):
+async def handler(websocket, path):  
     print("Jugador conectado")
     clientes.add(websocket)
     try:
@@ -21,7 +21,9 @@ async def handler(websocket):
 
 async def main():
     async with websockets.serve(handler, "0.0.0.0", PORT):
-        print("Servidor WebSocket listo")
+        print(f"Servidor WebSocket listo en puerto {PORT}")
         await asyncio.Future()  # corre para siempre
 
 asyncio.run(main())
+
+
