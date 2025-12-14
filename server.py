@@ -3,13 +3,21 @@ import websockets
 import os
 
 PORT = int(os.environ.get("PORT", 10000))
-clientes = set()
+clientes = []   # asignar roles según orden
 
-async def handler(websocket, path):  
+async def handler(websocket, path):   
     print("Jugador conectado")
-    clientes.add(websocket)
+
+    # Asigna el rol automáticamente según orden de conexión
+    if len(clientes) == 0:
+        await websocket.send("jugador=0")   # primer → X
+    else:
+        await websocket.send("jugador=1")   # segundo → O
+
+    clientes.append(websocket)
     try:
         async for message in websocket:
+            # reenviar jugada a todos los demás
             for c in clientes:
                 if c != websocket:
                     await c.send(message)
@@ -25,5 +33,6 @@ async def main():
         await asyncio.Future()  # corre para siempre
 
 asyncio.run(main())
+
 
 
