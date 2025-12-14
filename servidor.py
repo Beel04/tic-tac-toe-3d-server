@@ -1,8 +1,9 @@
 import socket
 import threading
-
+import os
 HOST = "0.0.0.0"
-PORT = 5000
+PORT = int(os.environ.get("PORT", 5000))
+
 
 clientes = []
 
@@ -31,3 +32,4 @@ while True:
     print("Jugador conectado:", addr)
     clientes.append(conn)
     threading.Thread(target=manejar_cliente, args=(conn,)).start()
+
